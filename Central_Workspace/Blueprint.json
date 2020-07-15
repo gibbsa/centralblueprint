@@ -1,0 +1,91 @@
+{
+  "properties": {
+    "description": "Creates central logging workspace, automation account, storage account and adds update solution. Locks storage account and workspace.",
+    "targetScope": "subscription",
+    "parameters": {
+      "createWorkspace_Organization_Name": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Organization_Name (Create Workspace)"
+        },
+        "defaultValue": "Central-LAWS",
+        "allowedValues": []
+      },
+      "createWorkspace_data-retention": {
+        "type": "int",
+        "metadata": {
+          "displayName": "data-retention (Create Workspace)",
+          "description": "Number of days data will be retained for"
+        },
+        "defaultValue": 365,
+        "allowedValues": []
+      },
+      "createWorkspace_location": {
+        "type": "string",
+        "metadata": {
+          "displayName": "location (Create Workspace)",
+          "description": "Region used when establishing the workspace"
+        },
+        "defaultValue": "East US",
+        "allowedValues": [
+          "Australia Central",
+          "Australia East",
+          "Australia Southeast",
+          "Brazil South",
+          "Canada Central",
+          "Central India",
+          "Central US",
+          "East Asia",
+          "East US",
+          "East US 2",
+          "France Central",
+          "Japan East",
+          "Korea Central",
+          "North Central US",
+          "North Europe",
+          "South Africa North",
+          "South Central US",
+          "Southeast Asia",
+          "UK South",
+          "UK West",
+          "West Europe",
+          "West US",
+          "West US 2",
+          "USGov Virginia",
+          "USGov Iowa",
+          "USDoD East",
+          "USDoD Central",
+          "USGov Texas",
+          "USGov Arizona"
+        ]
+      },
+      "createWorkspace_automationAccountName": {
+        "type": "string",
+        "metadata": {
+          "displayName": "automationAccountName (Create Workspace)",
+          "description": "Automation account name"
+        },
+        "defaultValue": "CentralAA",
+        "allowedValues": []
+      },
+      "createWorkspace_automationAccountLocation": {
+        "type": "string",
+        "metadata": {
+          "displayName": "automationAccountLocation (Create Workspace)",
+          "description": "Specify the location in which to create the Automation account."
+        },
+        "defaultValue": "East US 2",
+        "allowedValues": []
+      }
+    },
+    "resourceGroups": {
+      "ResourceGroup": {
+        "name": "Central-Logging-RG",
+        "metadata": {
+          "displayName": "Central Workspace Resource Group"
+        },
+        "dependsOn": []
+      }
+    }
+  }
+}

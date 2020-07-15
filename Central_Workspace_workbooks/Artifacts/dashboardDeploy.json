@@ -1,0 +1,566 @@
+{
+    "kind": "template",
+    "properties": {
+      "displayName": "Deploy HDI Dashboard",
+      "dependsOn": [
+        "workspaceCreation"
+      ],
+      "template": {
+        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "parameters": {
+          "Organization_Name": {
+            "type": "string"
+          },
+          "workspaceID": {
+            "type": "string"
+          },
+          "workbookId" : {
+              "type": "string"
+          }
+        },
+        "variables": {},
+        "resources": [
+            {
+                "name": "severnhdila",
+                "type": "Microsoft.Portal/dashboards",
+                "location": "[resourceGroup().location]",
+                "tags": {
+                  "hidden-title": "Severn - HDI via LA"
+                },
+                "apiVersion": "2015-08-01-preview",        
+                "properties": {
+                    "lenses": {
+                      "0": {
+                        "order": 0,
+                        "parts": {
+                          "0": {
+                            "position": {
+                              "x": 0,
+                              "y": 0,
+                              "colSpan": 1,
+                              "rowSpan": 1
+                            },
+                            "metadata": {
+                              "inputs": [],
+                              "type": "Extension/HubsExtension/PartType/ClockPart",
+                              "settings": {}
+                            }
+                          },
+                          "1": {
+                            "position": {
+                              "x": 1,
+                              "y": 0,
+                              "colSpan": 4,
+                              "rowSpan": 1
+                            },
+                            "metadata": {
+                              "inputs": [],
+                              "type": "Extension/HubsExtension/PartType/MarkdownPart",
+                              "settings": {
+                                "content": {
+                                  "settings": {
+                                    "content": "\n",
+                                    "title": "CPU",
+                                    "subtitle": "",
+                                    "markdownSource": 1
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "2": {
+                            "position": {
+                              "x": 5,
+                              "y": 0,
+                              "colSpan": 5,
+                              "rowSpan": 1
+                            },
+                            "metadata": {
+                              "inputs": [],
+                              "type": "Extension/HubsExtension/PartType/MarkdownPart",
+                              "settings": {
+                                "content": {
+                                  "settings": {
+                                    "content": "",
+                                    "title": "Disks",
+                                    "subtitle": "",
+                                    "markdownSource": 1
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "3": {
+                            "position": {
+                              "x": 10,
+                              "y": 0,
+                              "colSpan": 5,
+                              "rowSpan": 1
+                            },
+                            "metadata": {
+                              "inputs": [],
+                              "type": "Extension/HubsExtension/PartType/MarkdownPart",
+                              "settings": {
+                                "content": {
+                                  "settings": {
+                                    "content": "",
+                                    "title": "Network",
+                                    "subtitle": "",
+                                    "markdownSource": 1
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "4": {
+                            "position": {
+                              "x": 0,
+                              "y": 1,
+                              "colSpan": 5,
+                              "rowSpan": 4
+                            },
+                            "metadata": {
+                              "inputs": [
+                                {
+                                  "name": "ComponentId",
+                                  "value": "[parameters('workspaceID')]",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "TimeContext",
+                                  "value": null,
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ResourceIds",
+                                  "value": [
+                                    "[parameters('workspaceID')]"
+                                  ],
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ConfigurationId",
+                                  "value": "[parameters('workbookId')]",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "Type",
+                                  "value": "workbook",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "GalleryResourceType",
+                                  "value": "microsoft.operationalinsights/workspaces",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "PinName",
+                                  "value": "Severn HDI",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "StepSettings",
+                                  "value": "{\"version\":\"KqlItem/1.0\",\"query\":\"Perf\\n| where Computer startswith \\\"wn\\\"\\n| where CounterName == \\\"% Processor Time\\\"\\n| project TimeGenerated, CounterName, CounterValue \\n| summarize avg(CounterValue) by CounterName, bin(TimeGenerated, 1m)\\n| render timechart\\n\",\"size\":1,\"title\":\"Percentage CPU AVG - Worker Nodes\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\"}",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ParameterValues",
+                                  "value": {},
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "Location",
+                                  "value": "eastus",
+                                  "isOptional": true
+                                }
+                              ],
+                              "type": "Extension/AppInsightsExtension/PartType/PinnedNotebookQueryPart"
+                            }
+                          },
+                          "5": {
+                            "position": {
+                              "x": 5,
+                              "y": 1,
+                              "colSpan": 5,
+                              "rowSpan": 4
+                            },
+                            "metadata": {
+                              "inputs": [
+                                {
+                                  "name": "ComponentId",
+                                  "value": "[parameters('workspaceID')]",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "TimeContext",
+                                  "value": null,
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ResourceIds",
+                                  "value": [
+                                    "[parameters('workspaceID')]"
+                                  ],
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ConfigurationId",
+                                  "value": "[parameters('workbookId')]",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "Type",
+                                  "value": "workbook",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "GalleryResourceType",
+                                  "value": "microsoft.operationalinsights/workspaces",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "PinName",
+                                  "value": "Severn HDI",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "StepSettings",
+                                  "value": "{\"version\":\"KqlItem/1.0\",\"query\":\"Perf\\n| where Computer startswith \\\"wn\\\"\\n| where CounterName == \\\"Disk Reads/sec\\\" or CounterName == \\\"Disk Writes/sec\\\" \\n| project TimeGenerated, CounterName, CounterValue \\n| summarize avg(CounterValue) by CounterName, bin(TimeGenerated, 1m)\\n| render timechart\",\"size\":1,\"title\":\"Avg Disk Write Byte and Avg Disk Read Bytes\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\"}",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ParameterValues",
+                                  "value": {},
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "Location",
+                                  "value": "eastus",
+                                  "isOptional": true
+                                }
+                              ],
+                              "type": "Extension/AppInsightsExtension/PartType/PinnedNotebookQueryPart"
+                            }
+                          },
+                          "6": {
+                            "position": {
+                              "x": 10,
+                              "y": 1,
+                              "colSpan": 5,
+                              "rowSpan": 4
+                            },
+                            "metadata": {
+                              "inputs": [
+                                {
+                                  "name": "ComponentId",
+                                  "value": "[parameters('workspaceID')]",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "TimeContext",
+                                  "value": null,
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ResourceIds",
+                                  "value": [
+                                    "[parameters('workspaceID')]"
+                                  ],
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ConfigurationId",
+                                  "value": "[parameters('workbookId')]",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "Type",
+                                  "value": "workbook",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "GalleryResourceType",
+                                  "value": "microsoft.operationalinsights/workspaces",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "PinName",
+                                  "value": "Severn HDI",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "StepSettings",
+                                  "value": "{\"version\":\"KqlItem/1.0\",\"query\":\"Perf\\n| where Computer startswith \\\"wn\\\"\\n| where CounterName == \\\"Total Bytes Received\\\"\\n| project TimeGenerated, CounterName, CounterValue \\n| summarize sum(CounterValue) by CounterName, bin(TimeGenerated, 1m)\\n| render timechart\",\"size\":1,\"title\":\"Sum Network Traffic for Workers\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\"}",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ParameterValues",
+                                  "value": {},
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "Location",
+                                  "value": "eastus",
+                                  "isOptional": true
+                                }
+                              ],
+                              "type": "Extension/AppInsightsExtension/PartType/PinnedNotebookQueryPart"
+                            }
+                          },
+                          "7": {
+                            "position": {
+                              "x": 0,
+                              "y": 5,
+                              "colSpan": 5,
+                              "rowSpan": 4
+                            },
+                            "metadata": {
+                              "inputs": [
+                                {
+                                  "name": "ComponentId",
+                                  "value": "[parameters('workspaceID')]",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "TimeContext",
+                                  "value": null,
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ResourceIds",
+                                  "value": [
+                                    "[parameters('workspaceID')]"
+                                  ],
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ConfigurationId",
+                                  "value": "[parameters('workbookId')]",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "Type",
+                                  "value": "workbook",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "GalleryResourceType",
+                                  "value": "microsoft.operationalinsights/workspaces",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "PinName",
+                                  "value": "Severn HDI",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "StepSettings",
+                                  "value": "{\"version\":\"KqlItem/1.0\",\"query\":\"Perf\\n| where Computer startswith \\\"wn\\\"\\n| where CounterName == \\\"% Processor Time\\\"\\n| project TimeGenerated, CounterName, CounterValue, Computer \\n| summarize avg(CounterValue) by Computer, bin(TimeGenerated, 1m)\\n| render timechart\",\"size\":1,\"title\":\"Avg Percentage CPU by Worker\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"areachart\"}",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ParameterValues",
+                                  "value": {},
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "Location",
+                                  "value": "eastus",
+                                  "isOptional": true
+                                }
+                              ],
+                              "type": "Extension/AppInsightsExtension/PartType/PinnedNotebookQueryPart"
+                            }
+                          },
+                          "8": {
+                            "position": {
+                              "x": 5,
+                              "y": 5,
+                              "colSpan": 5,
+                              "rowSpan": 4
+                            },
+                            "metadata": {
+                              "inputs": [
+                                {
+                                  "name": "ComponentId",
+                                  "value": "[parameters('workspaceID')]",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "TimeContext",
+                                  "value": null,
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ResourceIds",
+                                  "value": [
+                                    "[parameters('workspaceID')]"
+                                  ],
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ConfigurationId",
+                                  "value": "[parameters('workbookId')]",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "Type",
+                                  "value": "workbook",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "GalleryResourceType",
+                                  "value": "microsoft.operationalinsights/workspaces",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "PinName",
+                                  "value": "Severn HDI",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "StepSettings",
+                                  "value": "{\"version\":\"KqlItem/1.0\",\"query\":\"Perf\\n| where Computer startswith \\\"wn\\\"\\n| where CounterName == \\\"Disk Transfers/sec\\\" and InstanceName == \\\"_Total\\\" \\n| project TimeGenerated, CounterName, CounterValue, Computer \\n| summarize sum(CounterValue) by Computer, bin(TimeGenerated, 1m)\\n| render timechart\",\"size\":1,\"title\":\"Sum Disk Transactions by Worker\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"areachart\"}",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ParameterValues",
+                                  "value": {},
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "Location",
+                                  "value": "eastus",
+                                  "isOptional": true
+                                }
+                              ],
+                              "type": "Extension/AppInsightsExtension/PartType/PinnedNotebookQueryPart"
+                            }
+                          },
+                          "9": {
+                            "position": {
+                              "x": 10,
+                              "y": 5,
+                              "colSpan": 5,
+                              "rowSpan": 4
+                            },
+                            "metadata": {
+                              "inputs": [
+                                {
+                                  "name": "ComponentId",
+                                  "value": "[parameters('workspaceID')]",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "TimeContext",
+                                  "value": null,
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ResourceIds",
+                                  "value": [
+                                    "[parameters('workspaceID')]"
+                                  ],
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ConfigurationId",
+                                  "value": "[parameters('workbookId')]",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "Type",
+                                  "value": "workbook",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "GalleryResourceType",
+                                  "value": "microsoft.operationalinsights/workspaces",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "PinName",
+                                  "value": "Severn HDI",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "StepSettings",
+                                  "value": "{\"version\":\"KqlItem/1.0\",\"query\":\"Perf\\n| where Computer startswith \\\"wn\\\"\\n| where CounterName == \\\"Total Bytes Transmitted\\\"\\n| project TimeGenerated, CounterName, CounterValue \\n| summarize sum(CounterValue) by CounterName, bin(TimeGenerated, 1m)\\n| render timechart\",\"size\":1,\"title\":\"Sum Network Traffic for Workers\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\"}",
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "ParameterValues",
+                                  "value": {},
+                                  "isOptional": true
+                                },
+                                {
+                                  "name": "Location",
+                                  "value": "eastus",
+                                  "isOptional": true
+                                }
+                              ],
+                              "type": "Extension/AppInsightsExtension/PartType/PinnedNotebookQueryPart"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "model": {
+                        "timeRange": {
+                          "value": {
+                            "relative": {
+                              "duration": 24,
+                              "timeUnit": 1
+                            }
+                          },
+                          "type": "MsPortalFx.Composition.Configuration.ValueTypes.TimeRange"
+                        },
+                        "filterLocale": {
+                          "value": "en-us"
+                        },
+                        "filters": {
+                          "value": {
+                            "MsPortalFx_TimeRange": {
+                              "model": {
+                                "format": "utc",
+                                "granularity": "auto",
+                                "relative": "3d"
+                              },
+                              "displayCache": {
+                                "name": "UTC Time",
+                                "value": "Past 3 days"
+                              },
+                              "filteredPartIds": [
+                                "StartboardPart-PinnedNotebookQueryPart-0199551f-d18e-4f52-a36a-80fed0dbc77b",
+                                "StartboardPart-PinnedNotebookQueryPart-0199551f-d18e-4f52-a36a-80fed0dbc77d",
+                                "StartboardPart-PinnedNotebookQueryPart-0199551f-d18e-4f52-a36a-80fed0dbc77f",
+                                "StartboardPart-PinnedNotebookQueryPart-0199551f-d18e-4f52-a36a-80fed0dbc781",
+                                "StartboardPart-PinnedNotebookQueryPart-0199551f-d18e-4f52-a36a-80fed0dbc783",
+                                "StartboardPart-PinnedNotebookQueryPart-0199551f-d18e-4f52-a36a-80fed0dbc785"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+            }
+        ]
+
+        },
+        "resourceGroup": "ResourceGroup",
+        "parameters": {
+          "Organization_Name": {
+            "value": "[parameters('createWorkspace_Organization_Name')]"
+          },
+          "workspaceID": {
+            "value": "[artifacts('workspaceCreation').outputs.workspaceResourceId]"
+          },
+          "workbookId": {
+              "value": "[artifacts('workspaceCreation').outputs.workbookId]"
+          }
+        }
+    }
+}

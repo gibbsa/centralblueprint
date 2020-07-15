@@ -1,0 +1,563 @@
+{
+  "kind": "template",
+  "properties": {
+    "displayName": "Create Workspace",
+    "description": "Creates a central logging workspace, central storage account for additional logging, add update management and automation account.",
+    "template": {
+      "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "Organization_Name": {
+          "type": "string",
+          "defaultValue": "Severn-LAWS"
+        },
+        "data-retention": {
+          "type": "int",
+          "defaultValue": 365,
+          "minValue": 0,
+          "maxValue": 730,
+          "metadata": {
+            "displayName": "Log retention in days",
+            "description": "Number of days data will be retained for"
+          }
+        },
+        "location": {
+          "type": "string",
+          "defaultValue": "East US",
+          "metadata": {
+            "displayName": "Location",
+            "description": "Region used when establishing the workspace"
+          },
+          "allowedValues": [
+            "Australia Central",
+            "Australia East",
+            "Australia Southeast",
+            "Brazil South",
+            "Canada Central",
+            "Central India",
+            "Central US",
+            "East Asia",
+            "East US",
+            "East US 2",
+            "France Central",
+            "Japan East",
+            "Korea Central",
+            "North Central US",
+            "North Europe",
+            "South Africa North",
+            "South Central US",
+            "Southeast Asia",
+            "UK South",
+            "UK West",
+            "West Europe",
+            "West US",
+            "West US 2",
+            "USGov Virginia",
+            "USGov Iowa",
+            "USDoD East",
+            "USDoD Central",
+            "USGov Texas",
+            "USGov Arizona"
+          ]
+        },
+        "automationAccountName": {
+          "type": "string",
+          "defaultValue": "SevernAA",
+          "metadata": {
+            "description": "Automation account name"
+          }
+        },
+        "automationAccountLocation": {
+          "type": "string",
+          "defaultValue": "East US 2",
+          "metadata": {
+            "description": "Specify the location in which to create the Automation account."
+          },
+          "allowedValues": [
+            "Australia Central",
+            "Australia East",
+            "Australia Southeast",
+            "Brazil South",
+            "Canada Central",
+            "Central India",
+            "Central US",
+            "East Asia",
+            "East US",
+            "East US 2",
+            "France Central",
+            "Japan East",
+            "Korea Central",
+            "North Central US",
+            "North Europe",
+            "South Africa North",
+            "South Central US",
+            "Southeast Asia",
+            "UK South",
+            "UK West",
+            "West Europe",
+            "West US",
+            "West US 2",
+            "USGov Virginia",
+            "USGov Iowa",
+            "USDoD East",
+            "USDoD Central",
+            "USGov Texas",
+            "USGov Arizona"
+          ]
+        },
+        "workbookId": {
+          "type": "string",
+          "defaultValue": "[newGuid()]",
+          "metadata": {
+            "description": "The unique guid for this workbook instance"
+          }
+        }
+      },
+      "variables": {
+        "deployment-prefix": "[concat(parameters('Organization_Name'), '-sharedsvcs')]",
+        "uniqueString": "[uniqueString(subscription().id, concat(variables('deployment-prefix'), '-log'))]",
+        "diagnostic-storageAccount-prefix": "[concat(replace(variables('deployment-prefix'), '-', ''), 'diag')]",
+        "diagnostic-storageAccount-name": "[toLower(substring(replace(concat(variables('diagnostic-storageAccount-prefix'), variables('uniqueString'), variables('uniqueString')), '-', ''), 0, 23) )]",
+        "workspace-name": "[concat(variables('deployment-prefix'), '-log')]",
+        "workbookDisplayName": "[concat(parameters('Organization_Name'),'hdi metrics')]",
+        "solutionArray": {
+          "solutions" : [
+            {
+              "name": "[concat('Updates', '(', variables('workspace-name'), ')')]",
+              "galleryName": "Updates"
+            },
+            {
+              "name": "[concat('ChangeTracking', '(', variables('workspace-name'), ')')]",
+          "galleryName": "ChangeTracking"
+            },
+           {
+            "name": "[concat('Security', '(', variables('workspace-name'), ')')]",
+            "galleryName": "Security"
+           },
+           {
+            "name": "[concat('SecurityCenterFree', '(', variables('workspace-name'), ')')]",
+            "galleryName": "SecurityCenterFree"
+           },
+           {
+            "name": "[concat('Containers', '(', variables('workspace-name'), ')')]",
+            "galleryName": "Containers"
+           },
+           {
+            "name": "[concat('VMInsights', '(', variables('workspace-name'), ')')]",
+            "galleryName": "VMInsights"
+           },
+           {
+            "name": "[concat('SecurityInsights', '(', variables('workspace-name'), ')')]",
+            "galleryName": "SecurityInsights"
+           }     
+          ]
+        }
+      },
+      "resources": [
+        {
+          "comments": "----DIAGNOSTICS STORAGE ACCOUNT-----",
+          "type": "Microsoft.Storage/storageAccounts",
+          "name": "[variables('diagnostic-storageAccount-name')]",
+          "apiVersion": "2018-07-01",
+          "location": "[resourceGroup().location]",
+          "kind": "StorageV2",
+          "sku": {
+            "name": "Standard_LRS"
+          },
+          "tags": {
+            "displayName": "Storage Account"
+          },
+          "properties": {
+            "encryption": {
+              "keySource": "Microsoft.Storage",
+              "services": {
+                "blob": {
+                  "enabled": true
+                },
+                "file": {
+                  "enabled": true
+                }
+              }
+            },
+            "supportsHttpsTrafficOnly": true
+          }
+        },
+        {
+          "type": "Microsoft.Storage/storageAccounts/providers/locks",
+          "apiVersion": "2016-09-01",
+          "name": "[concat(variables('diagnostic-storageAccount-name'), '/Microsoft.Authorization/storageDoNotDelete')]",
+          "dependsOn": [
+            "[concat('Microsoft.Storage/storageAccounts/', variables('diagnostic-storageAccount-name'))]"
+          ],
+          "comments": "Resource lock on diagnostic storage account",
+          "properties": {
+            "level": "CannotDelete"
+          }
+        },
+        {
+          "type": "Microsoft.OperationalInsights/workspaces",
+          "name": "[variables('workspace-name')]",
+          "apiVersion": "2017-03-15-preview",
+          "location": "[parameters('location')]",
+          "tags": {
+            "displayName": "Log Analytics"
+          },
+          "properties": {
+            "sku": {
+              "Name": "pergb2018"
+            },
+            "retention": "[parameters('data-retention')]"
+          },
+          "resources": [
+            {
+              "apiVersion": "2015-11-01-preview",
+              "type": "datasources",
+              "name": "sampleWindowsEvent1",
+              "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+              ],
+              "kind": "WindowsEvent",
+              "properties": {
+                "eventLogName": "Application",
+                "eventTypes": [
+                  {
+                    "eventType": "Error"
+                  },
+                  {
+                    "eventType": "Warning"
+                  }
+                ]
+              }
+            },
+            {
+              "apiVersion": "2015-11-01-preview",
+              "type": "datasources",
+              "name": "sampleWindowsPerfCounter1",
+              "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+              ],
+              "kind": "WindowsPerformanceCounter",
+              "properties": {
+                "objectName": "Memory",
+                "instanceName": "*",
+                "intervalSeconds": 10,
+                "counterName": "Available MBytes"
+              }
+            },
+            {
+              "apiVersion": "2015-11-01-preview",
+              "type": "datasources",
+              "name": "sampleIISLog1",
+              "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+              ],
+              "kind": "IISLogs",
+              "properties": {
+                "state": "OnPremiseEnabled"
+              }
+            },
+            {
+              "apiVersion": "2015-11-01-preview",
+              "type": "datasources",
+              "name": "sampleSyslog1",
+              "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+              ],
+              "kind": "LinuxSyslog",
+              "properties": {
+                "syslogName": "kern",
+                "syslogSeverities": [
+                  {
+                    "severity": "emerg"
+                  },
+                  {
+                    "severity": "alert"
+                  },
+                  {
+                    "severity": "crit"
+                  },
+                  {
+                    "severity": "err"
+                  },
+                  {
+                    "severity": "warning"
+                  }
+                ]
+              }
+            },
+            {
+              "apiVersion": "2015-11-01-preview",
+              "type": "datasources",
+              "name": "sampleSyslogCollection1",
+              "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+              ],
+              "kind": "LinuxSyslogCollection",
+              "properties": {
+                "state": "Enabled"
+              }
+            },
+            {
+              "apiVersion": "2015-11-01-preview",
+              "type": "datasources",
+              "name": "sampleLinuxPerf1",
+              "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+              ],
+              "kind": "LinuxPerformanceObject",
+              "properties": {
+                "performanceCounters": [
+                  {
+                    "counterName": "% Used Inodes"
+                  },
+                  {
+                    "counterName": "Free Megabytes"
+                  },
+                  {
+                    "counterName": "% Used Space"
+                  },
+                  {
+                    "counterName": "Disk Transfers/sec"
+                  },
+                  {
+                    "counterName": "Disk Reads/sec"
+                  },
+                  {
+                    "counterName": "Disk Writes/sec"
+                  }
+                ],
+                "objectName": "Logical Disk",
+                "instanceName": "*",
+                "intervalSeconds": 10
+              }
+            },
+            {              
+              "type": "savedSearches",
+              "apiVersion": "2017-04-26-preview",
+              "name": "Scenario1 Activity Logs",
+              "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+              ],
+              "properties": {
+                "eTag": "*",
+                "category": "Scenario1",
+                "displayName": "Scenario1 Azure Activity",
+                "query": "AzureActivity | where TimeGenerated > ago(24h) | where Caller contains \"scenario1\" | | extend localTimeStamp = TimeGenerated - 4h",
+                "Version": 2
+              }
+            },
+            {              
+              "type": "savedSearches",
+              "apiVersion": "2017-04-26-preview",
+              "name": "Scenario1 Sign-In",
+              "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+              ],
+              "properties": {
+                "eTag": "*",
+                "category": "Scenario1",
+                "displayName": "Scenario1 Sign-In",
+                "query": "SigninLogs | where TimeGenerated > ago(24h) | where Identity contains \"scenario1\" | extend localTimeStamp = TimeGenerated - 4h | limit 10",
+                "Version": 2
+              }
+            },
+            {              
+              "type": "savedSearches",
+              "apiVersion": "2017-04-26-preview",
+              "name": "Scenario2 Bastion Bad Password",
+              "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+              ],
+              "properties": {
+                "etag": "*",
+                "Category": "Scenario2",
+                "DisplayName": "Scenario2 - Bastion Bad Password",
+                "Query": "SecurityEvent\r\n| where TimeGenerated > ago(10m)\r\n| where Computer == 'scenario1VM'\r\n| where EventID == 4625\r\n| extend localTimeGenerated = TimeGenerated - (4h)\r\n| order by localTimeGenerated asc\r\n\r\n\r\nAzureActivity\r\n| where TimeGenerated > ago(10m)\r\n| where Caller contains \"scenario2\"\r\n| extend localTimeGenerated = TimeGenerated - (4h)\r\n| order by localTimeGenerated asc\r\n\r\n// Optional Bad Password search with example of lookup table for reason description\r\nlet ReasonTable=datatable(Status:string, ErrDescription:string) [ \r\n\"0xc000006d\",\t\"This is either due to a bad username or authentication information\",\r\n\"0xc000006e\",\t\"Unknown user name or bad password.\",\r\n\"0xc0000193\",\t\"account expiration\",\r\n\"0xc000006d\",\t\"This is either due to a bad username or authentication information\",\r\n\"0xc000018c\",\t\"The logon request failed because the trust relationship between the primary domain and the trusted domain failed.\",\r\n\"0xc000005e\",   \"There are currently no logon servers available to service the logon request.\",\r\n\"0xc00000dc\",\t\"Indicates the Sam Server was in the wrong state to perform the desired operation.\",\r\n\"0xc0000224\",\t\"user is required to change password at next logon\",\r\n\"0xc0000192\",\t\"An attempt was made to logon, but the netlogon service was not started.\",\r\n\"0xc0000413\",\t\"Logon Failure: The machine you are logging onto is protected by an authentication firewall. The specified account is not allowed to authenticate to the machine.\"\r\n];\r\nSecurityEvent\r\n| where EventID == 4625\r\n| lookup kind=leftouter ReasonTable on Status\r\n| project TimeGenerated, Account, Computer, IpAddress, ErrDescription \r\n| order by TimeGenerated desc",
+                "Version": 2
+              }
+            },
+            {              
+              "type": "savedSearches",
+              "apiVersion": "2017-04-26-preview",
+              "name": "Scenario2 Clear Security log",
+              "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+              ],
+              "properties": {
+                "etag": "*",
+                "Category": "Scenario2",
+                "DisplayName": "Scenario2 - Clear Security log",
+                "Query": "SecurityAlert\r\n| where TimeGenerated > ago(12h)\r\n| where DisplayName contains \"cleared\"\r\n| extend localTimeGenerated = TimeGenerated - (4h)",
+                "Version": 2
+              }
+            },
+            {              
+              "type": "savedSearches",
+              "apiVersion": "2017-04-26-preview",
+              "name": "Scenario2 Portal Password Reset",
+              "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+              ],
+              "properties": {
+                "etag": "*",
+                "Category": "Scenario2",
+                "DisplayName": "Scenario2 - Portal Password Reset",
+                "Query": "SecurityEvent\n| where TimeGenerated > ago(10m)\n| where Computer == 'scenario1VM'\n| where EventID == 4738\n| extend localTimeGenerated = TimeGenerated - (4h)\n| order by localTimeGenerated asc\n\nAzureActivity\n| where TimeGenerated > ago(10m)\n| where Caller contains \"scenario2\"\n| extend localTimeGenerated = TimeGenerated - (4h)\n| order by localTimeGenerated asc ",
+                "Version": 2
+              }
+            },
+            {              
+              "type": "savedSearches",
+              "apiVersion": "2017-04-26-preview",
+              "name": "Scenario3 File Change",
+              "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+              ],
+              "properties": {
+                "etag": "*",
+                "Category": "Scenario3",
+                "DisplayName": "Scenario3 - File Change",
+                "Query": "ConfigurationChange\r\n| where Computer == \"severn-lo000001\"\r\n| where ConfigChangeType in(\"Files\")\r\n| where TimeGenerated > ago(1h)\r\n| extend localTimeGenerated = TimeGenerated - (4h)\r\n| order by TimeGenerated\r\n| render table",
+                "Version": 2
+              }
+            },
+            {              
+              "type": "savedSearches",
+              "apiVersion": "2017-04-26-preview",
+              "name": "Scenario3 Syslog Signin",
+              "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+              ],
+              "properties": {
+                "etag": "*",
+                "Category": "Scenario3",
+                "DisplayName": "Scenario3 - Syslog Signin",
+                "Query": "Syslog\r\n| where Computer == \"severn-lo000001\"\r\n| where TimeGenerated > ago(2h)\r\n| where Facility contains \"auth\"\r\n| where SyslogMessage contains \"password\"\r\n| extend localTimeGenerate = TimeGenerated - (4h)\r\n| order by TimeGenerated\r\n| render table\r\n",
+                "Version": 2
+              }
+            },
+            {              
+              "type": "savedSearches",
+              "apiVersion": "2017-04-26-preview",
+              "name": "Scenario4 File Upload to Storage",
+              "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+              ],
+              "properties": {
+                "etag": "*",
+                "Category": "Scenario4",
+                "DisplayName": "Scenario4 - File Upload to Storage",
+                "Query": "StorageBlobLogs \n| where TimeGenerated > ago(1h)\n| where Category == \"StorageWrite\"\n| extend localTimeGenerated = TimeGenerated - (4h)\n| sort by localTimeGenerated desc \n",
+                "Version": 2
+              }
+            },
+            {              
+              "type": "savedSearches",
+              "apiVersion": "2017-04-26-preview",
+              "name": "Scenario4 SSH Login",
+              "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+              ],
+              "properties": {
+                "etag": "*",
+                "Category": "Scenario4",
+                "DisplayName": "Scenario4 SSH Login",
+                "Query": "log_auth_CL\r\n| where TimeGenerated > ago(1h)\r\n| where Message contains \"scenario4ssh\"\r\n| extend localTimeGenerated = TimeGenerated - (4h)\r\n\r\nSyslog\r\n| where TimeGenerated > ago(1h)\r\n| where Facility == \"auth\"\r\n| where SyslogMessage contains \"scenario4ssh\"\r\n| extend localTimeGenerate = TimeGenerated - (4h)\r\n| order by TimeGenerated\r\n| render table",
+                "Version": 2
+              }
+            }
+          ]
+        },
+        {
+          "type": "Microsoft.Automation/automationAccounts",
+          "apiVersion": "2015-01-01-preview",
+          "name": "[parameters('automationAccountName')]",
+          "location": "[parameters('automationAccountLocation')]",
+          "dependsOn": [],
+          "tags": {},
+          "properties": {
+            "sku": {
+              "name": "Basic"
+            }
+          }
+        },
+        {
+          "apiVersion": "2015-11-01-preview",
+          "type": "Microsoft.OperationalInsights/workspaces/linkedServices",
+          "name": "[concat(variables('workspace-name'), '/' , 'Automation')]",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]",
+            "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'))]"
+          ],
+          "properties": {
+            "resourceId": "[resourceId('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'))]"
+          }
+        },
+        {
+          "type": "Microsoft.OperationalInsights/workspaces/providers/locks",
+          "apiVersion": "2016-09-01",
+          "name": "[concat(variables('workspace-name'), '/Microsoft.Authorization/logAnalyticsDoNotDelete')]",
+          "dependsOn": [
+            "[variables('workspace-name')]"
+          ],
+          "comments": "Resource lock on Log Analytics",
+          "properties": {
+            "level": "CannotDelete"
+          }
+        },
+        {
+          "apiVersion": "2015-11-01-preview",
+          "location": "[resourceGroup().location]",
+          "name": "[concat(variables('solutionArray').solutions[copyIndex()].Name)]",
+          "type": "Microsoft.OperationsManagement/solutions",
+          "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.OperationsManagement/solutions/', variables('solutionArray').solutions[copyIndex()].Name)]",
+          "dependsOn": [
+            "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+          ],
+          "copy": {
+            "name": "solutionCopy",
+            "count": "[length(variables('solutionArray').solutions)]"
+          },
+          "properties": {
+            "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('workspace-name'))]"
+          },
+          "plan": {
+            "name": "[variables('solutionArray').solutions[copyIndex()].Name]",
+            "publisher": "Microsoft",
+            "promotionCode": "",
+            "product": "[concat('OMSGallery/', variables('solutionArray').solutions[copyIndex()].galleryName)]"
+          }
+        }
+      ],
+      "outputs": {
+        "workspaceResourceId" : {
+          "type": "string",
+          "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('workspace-name'))]"
+        },
+        "workspaceName" : {
+          "type": "string",
+          "value": "[variables('workspace-name')]"
+        }
+      }
+    },
+    "resourceGroup": "ResourceGroup",
+    "parameters": {
+      "Organization_Name": {
+        "value": "[parameters('createWorkspace_Organization_Name')]"
+      },
+      "data-retention": {
+        "value": "[parameters('createWorkspace_data-retention')]"
+      },
+      "location": {
+        "value": "[parameters('createWorkspace_location')]"
+      },
+      "automationAccountName": {
+        "value": "[parameters('createWorkspace_automationAccountName')]"
+      },
+      "automationAccountLocation": {
+        "value": "[parameters('createWorkspace_automationAccountLocation')]"
+      }
+    }
+  }
+}

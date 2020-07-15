@@ -1,0 +1,80 @@
+{
+  "kind": "template",
+  "properties": {
+    "displayName": "Create Activity Log Diagnostic Settings",
+    "description": "",
+    "dependsOn": [
+      "ResourceGroup"
+    ],
+    "template": {
+      "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "Organization_Name": {
+          "type": "string"
+        },
+        "workspaceID": {
+          "type": "string"
+        }
+      },
+      "variables": {
+        "deployment-prefix": "[concat(parameters('Organization_Name'), '-sharedsvcs')]",
+        "workspace-name": "[concat(variables('deployment-prefix'), '-log')]"
+      },
+      "resources": [
+        {
+          "name": "subscriptionLogsToLogAnalytics",
+          "type": "Microsoft.Insights/diagnosticSettings",
+          "apiVersion": "2017-05-01-preview",
+          "location": "global",
+          "dependsOn": [],
+          "properties": {
+            "workspaceId": "[parameters('workspaceID')]",
+            "logs": [
+              {
+                "category": "Administrative",
+                "enabled": true
+              },
+              {
+                "category": "Security",
+                "enabled": true
+              },
+              {
+                "category": "ServiceHealth",
+                "enabled": true
+              },
+              {
+                "category": "Alert",
+                "enabled": true
+              },
+              {
+                "category": "Recommendation",
+                "enabled": true
+              },
+              {
+                "category": "Policy",
+                "enabled": true
+              },
+              {
+                "category": "Autoscale",
+                "enabled": true
+              },
+              {
+                "category": "ResourceHealth",
+                "enabled": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "parameters": {
+      "Organization_Name": {
+        "value": "[parameters('createWorkspace_Organization_Name')]"
+      },
+      "workspaceID": {
+        "value": "[artifacts('workspaceCreation').outputs.workspaceResourceId]"
+      }
+    }
+  }
+}

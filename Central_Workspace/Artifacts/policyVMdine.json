@@ -1,0 +1,14 @@
+{
+    "kind": "policyAssignment",
+    "properties": {
+        "displayName": "Deploy VMSS Monitoring",
+        "description": "Deploy VMSS Monitoring",
+        "dependsOn": ["workspaceCreation"],
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policySetDefinitions/75714362-cae7-409e-9b99-a8e5075b7fad",
+        "parameters": {
+            "logAnalytics_1": {
+                "value": "[artifacts('workspaceCreation').outputs.workspaceResourceId]"
+            }
+        }
+    }
+}
