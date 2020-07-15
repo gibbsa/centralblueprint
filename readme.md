@@ -36,7 +36,7 @@ Parameters:
           "description": "Region used when establishing the workspace"
         },
         "defaultValue": "East US"
-"createWorkspace_automationAccountName": {
+"createWorkspace_automationAccountName"{
         "type": "string",
         "metadata": {
           "displayName": "automationAccountName (Create Workspace)",
