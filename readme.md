@@ -2,6 +2,7 @@
 
 ### Test blue print and script for setting up central logging.
 
+![Architecture](/images/architecture.png)
 
 Central_Workspace:
 

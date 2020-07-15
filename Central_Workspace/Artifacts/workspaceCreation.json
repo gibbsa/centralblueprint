@@ -119,7 +119,6 @@
         "diagnostic-storageAccount-prefix": "[concat(replace(variables('deployment-prefix'), '-', ''), 'diag')]",
         "diagnostic-storageAccount-name": "[toLower(substring(replace(concat(variables('diagnostic-storageAccount-prefix'), variables('uniqueString'), variables('uniqueString')), '-', ''), 0, 23) )]",
         "workspace-name": "[concat(variables('deployment-prefix'), '-log')]",
-        "workbookDisplayName": "[concat(parameters('Organization_Name'),'hdi metrics')]",
         "solutionArray": {
           "solutions" : [
             {
