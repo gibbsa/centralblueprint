@@ -72,7 +72,7 @@ if($AzLogin.Count -gt 1)
     while($SelectedSubscriptionItem -gt $AzLogin.Count -or $SelectedSubscriptionItem -lt 1)
     {
         write-host("Select a subscription")
-        $AzLogin | Select "#", Name, ID | Format-Table
+        $AzLogin | Select-Object "#", Name, ID | Format-Table
         try
         {
             $SelectedSubscriptionItem = Read-Host "Choose:"
